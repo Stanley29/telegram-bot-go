@@ -1,12 +1,52 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/stanley29/telegram-bot-go
-  tag: latest
+  registry: "ghcr.io"
+  repository: "stanley29/telegram-bot-go"
+  tag: "v1.0.0-106879e"
+  os: linux
+  arch: amd64
   pullPolicy: IfNotPresent
 
 service:
+  name: telegram-bot
   type: ClusterIP
   port: 80
 
-resources: {}
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 128Mi
+
+env:
+  TELEGRAM_TOKEN: ""
+  LOG_LEVEL: "info"
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 80
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 80
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
